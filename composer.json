@@ -1,0 +1,38 @@
+{
+    "name": "hesamrad/php-otp",
+    "description": "A PHP library to generate OTP codes. (TOTP and HOTP are supported.)",
+    "type": "library",
+    "homepage": "https://github.com/hesamzakerirad/php-otp/",
+    "keywords": [
+        "otp",
+        "totp",
+        "hotp"
+    ],
+    "autoload": {
+        "psr-4": {
+            "HesamRad\\Otp\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "HesamRad\\Otp\\Tests\\": "tests"
+        }
+    },
+    "authors": [
+        {
+            "name": "Hesam Rad",
+            "email": "hesamzakerirad@gmail.com",
+            "homepage": "https://hesamrad.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^8.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.3",
+        "orchestra/testbench": "^7.0"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
