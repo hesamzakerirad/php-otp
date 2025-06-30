@@ -1,8 +1,8 @@
-<?php 
+<?php
 
 namespace HesamRad\Otp;
 
-class Hotp implements Otp
+class Hotp extends Otp
 {
     public function __construct(
         private string $secret,
@@ -14,10 +14,14 @@ class Hotp implements Otp
 
     public function generate(): string
     {
-        $code = 0;
+        $counterBinary = pack('N*', 0) . pack('N*', $this->counter);
+        $key = $this->base32_decode($this->secret);
+        $hash = hash_hmac('sha1', $counterBinary, $key, true);
 
-        // implementation
+        $offset = ord($hash[19]) & 0x0F;
+        $truncatedHash = unpack("N", substr($hash, $offset, 4))[1] & 0x7fffffff;
 
-        return $code;
+        $otp = $truncatedHash % pow(10, $this->numberOfDigits);
+        return str_pad((string)$otp, $this->numberOfDigits, '0', STR_PAD_LEFT);
     }
 }

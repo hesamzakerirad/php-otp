@@ -2,7 +2,7 @@
 
 namespace HesamRad\Otp;
 
-class Totp implements Otp
+class Totp extends Otp
 {
     public function __construct(
         private string $secret,
@@ -27,27 +27,4 @@ class Totp implements Otp
         $otp = $truncatedHash % pow(10, $this->numberOfDigits);
         return str_pad((string)$otp, $this->numberOfDigits, '0', STR_PAD_LEFT);
     }
-
-    function base32_decode($b32)
-    {
-        $alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
-        $b32 = strtoupper($b32);
-        $binaryString = '';
-        foreach (str_split($b32) as $char) {
-            $index = strpos($alphabet, $char);
-            if ($index === false)
-                continue;
-            $binaryString .= str_pad(decbin($index), 5, '0', STR_PAD_LEFT);
-        }
-
-        $bytes = '';
-        foreach (str_split($binaryString, 8) as $byte) {
-            if (strlen($byte) < 8)
-                continue;
-            $bytes .= chr(bindec($byte));
-        }
-
-        return $bytes;
-    }
-
 }
