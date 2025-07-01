@@ -2,9 +2,43 @@
 
 namespace HesamRad\Otp;
 
-abstract class Otp
+class Otp
 {
-    public abstract function generate(): string;
+    /**
+     * Create a new OTP instance.
+     * 
+     * @param string $secret
+     * @param string $counter
+     * @param int $numberOfDigits
+     */
+    public function __construct(
+        protected string $secret,
+        protected string $counter,
+        protected int $numberOfDigits,
+    ) {
+
+    }
+
+    /**
+     * Generate a new OTP code. 
+     * 
+     * This OTP code can either be TOTP or HOTP.
+     * 
+     * @return string
+     */
+    public function generate()
+    {
+        $counterBinary = pack('N*', 0) . pack('N*', $this->counter);
+
+        $key = $this->base32_decode($this->secret);
+        $hash = hash_hmac('sha1', $counterBinary, $key, true);
+
+        $offset = ord($hash[19]) & 0x0F;
+        $truncatedHash = unpack("N", substr($hash, $offset, 4))[1] & 0x7fffffff;
+
+        $otp = $truncatedHash % pow(10, $this->numberOfDigits);
+        return str_pad((string)$otp, $this->numberOfDigits, '0', STR_PAD_LEFT);
+    }
 
     function base32_decode($b32)
     {

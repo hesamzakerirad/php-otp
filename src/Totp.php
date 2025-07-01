@@ -4,27 +4,23 @@ namespace HesamRad\Otp;
 
 class Totp extends Otp
 {
+    /**
+     * Create a new TOTP instance.
+     * 
+     * @param string $secret
+     * @param int $startingPoint
+     * @param int $interval
+     * @param int $numberOfDigits
+     * @return void
+     */
     public function __construct(
-        private string $secret,
-        private int $startingPoint,
-        private int $interval = 30,
-        private int $numberOfDigits = 6,
+        protected string $secret,
+        protected int $startingPoint,
+        protected int $interval = 30,
+        protected int $numberOfDigits = 6,
     ) {
-        //
-    }
-
-    public function generate(): string
-    {
         $counter = floor((time() - $this->startingPoint) / $this->interval);
-        $counterBinary = pack('N*', 0) . pack('N*', $counter); // 8-byte big-endian
 
-        $key = $this->base32_decode($this->secret); // You'll need to implement base32 decode
-        $hash = hash_hmac('sha1', $counterBinary, $key, true);
-
-        $offset = ord($hash[19]) & 0x0F;
-        $truncatedHash = unpack("N", substr($hash, $offset, 4))[1] & 0x7fffffff;
-
-        $otp = $truncatedHash % pow(10, $this->numberOfDigits);
-        return str_pad((string)$otp, $this->numberOfDigits, '0', STR_PAD_LEFT);
+        parent::__construct($secret, $counter, $numberOfDigits);
     }
 }
