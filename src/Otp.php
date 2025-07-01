@@ -30,7 +30,7 @@ class Otp
     {
         $counterBinary = pack('N*', 0) . pack('N*', $this->counter);
 
-        $key = $this->base32_decode($this->secret);
+        $key = $this->base32Decode($this->secret);
         $hash = hash_hmac('sha1', $counterBinary, $key, true);
 
         $offset = ord($hash[19]) & 0x0F;
@@ -40,11 +40,19 @@ class Otp
         return str_pad((string)$otp, $this->numberOfDigits, '0', STR_PAD_LEFT);
     }
 
-    function base32_decode($b32)
+    /**
+     * Decode the given string into base32 format.
+     * 
+     * @param string $b32
+     * @return string
+     */
+    function base32Decode(string $b32)
     {
         $alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
         $b32 = strtoupper($b32);
         $binaryString = '';
+        $bytes = '';
+
         foreach (str_split($b32) as $char) {
             $index = strpos($alphabet, $char);
             if ($index === false)
@@ -52,7 +60,6 @@ class Otp
             $binaryString .= str_pad(decbin($index), 5, '0', STR_PAD_LEFT);
         }
 
-        $bytes = '';
         foreach (str_split($binaryString, 8) as $byte) {
             if (strlen($byte) < 8)
                 continue;
