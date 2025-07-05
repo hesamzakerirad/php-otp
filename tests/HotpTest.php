@@ -10,12 +10,37 @@ class HotpTest extends TestCase
 
         $hotp = new \HesamRad\Otp\Hotp(
             secret: 'JBSWY3DPEHPK3PXA',
-            counter: 0
+            counter: 0,
+            numberOfDigits: 6,
+            algorithm: 'sha1'
         );
 
         $result = $hotp->generate();
 
         $this->assertEquals($expected, $result);
+    }
+
+    public function test_different_hashing_algorithms_generate_different_results()
+    {
+        $secret = random_bytes(20);
+        $counter = 0;
+        $numberOfDigits = 6;
+
+        $firstHotp = (new \HesamRad\Otp\Hotp(
+            secret: $secret,
+            counter: $counter,
+            numberOfDigits: $numberOfDigits,
+            algorithm: 'sha1',
+        ))->generate();
+
+        $secondHotp = (new \HesamRad\Otp\Hotp(
+            secret: $secret,
+            counter: $counter,
+            numberOfDigits: $numberOfDigits,
+            algorithm: 'sha256',
+        ))->generate();
+
+        $this->assertNotEquals($firstHotp, $secondHotp);
     }
 
     public function test_different_counters_generate_different_results()

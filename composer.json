@@ -31,7 +31,8 @@
     },
     "require-dev": {
         "phpunit/phpunit": "^9.3",
-        "orchestra/testbench": "^7.0"
+        "orchestra/testbench": "^7.0",
+        "symfony/phpunit-bridge": "^7.3"
     },
     "minimum-stability": "dev",
     "prefer-stable": true

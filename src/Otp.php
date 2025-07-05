@@ -2,6 +2,8 @@
 
 namespace HesamRad\Otp;
 
+use HesamRad\Otp\Exceptions\UnsupportedAlgorithmException;
+
 class Otp
 {
     /**
@@ -10,13 +12,17 @@ class Otp
      * @param string $secret
      * @param string $counter
      * @param int $numberOfDigits
+     * @param string $algorithm
      */
     public function __construct(
         protected string $secret,
         protected string $counter,
         protected int $numberOfDigits,
+        protected string $algorithm,
     ) {
-        //
+        if (! $this->isAlgorithmSupported($algorithm)) {
+            throw new UnsupportedAlgorithmException();
+        }
     }
 
     /**
@@ -29,12 +35,11 @@ class Otp
     public function generate()
     {
         $counterBinary = pack('N*', 0) . pack('N*', $this->counter);
-        $key = $this->base32Encode($this->secret);
 
-        $hash = hash_hmac('sha1', $counterBinary, $key, true);
+        $hash = hash_hmac($this->algorithm, $counterBinary, $this->getSecret(), true);
         $offset = ord($hash[19]) & 0x0F;
 
-        $truncatedHash = unpack("N", substr($hash, $offset, 4))[1] & 0x7fffffff;
+        $truncatedHash = unpack('N', substr($hash, $offset, 4))[1] & 0x7fffffff;
         $otp = $truncatedHash % pow(10, $this->numberOfDigits);
 
         return str_pad((string) $otp, $this->numberOfDigits, '0', STR_PAD_LEFT);
@@ -46,7 +51,7 @@ class Otp
      * @param string $b32
      * @return string
      */
-    function base32Encode(string $b32)
+    private function base32Encode(string $b32)
     {
         $alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
         $b32 = strtoupper($b32);
@@ -72,5 +77,26 @@ class Otp
         }
 
         return $bytes;
+    }
+
+    /**
+     * Check if given algorithm is supported to generate OTP.
+     *
+     * @param string $algorithm
+     * @return bool
+     */
+    private function isAlgorithmSupported($algorithm): bool
+    {
+        return in_array(strtolower($algorithm), hash_hmac_algos());
+    }
+
+    /**
+     * Return base32 encoded secret.
+     *
+     * @return string
+     */
+    private function getSecret(): string
+    {
+        return $this->base32Encode($this->secret);
     }
 }
